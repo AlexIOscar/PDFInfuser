@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="fontbox-2.0.25">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/fontbox-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/pdfbox-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/pdfbox-tools-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/preflight-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/xmpbox-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/CommandLineApps/pdfbox-app-2.0.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/CommandLineApps/preflight-app-2.0.25.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
