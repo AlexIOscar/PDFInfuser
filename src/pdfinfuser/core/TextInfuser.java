@@ -24,7 +24,7 @@ public class TextInfuser {
         //zero index corresponds to the first page
         int count = doc.getNumberOfPages();
         for (int i = 0; i < count; i++) {
-            addWatermarks(doc, i, "ORDER: 123456 Placed by: Ivanov I.O. Printed by: Tolstokulakov A.");
+            addWatermarks(doc, i, text);
         }
 
         PDPage page = doc.getPage(0);
@@ -44,7 +44,6 @@ public class TextInfuser {
         OutputStream ostr = stream.createOutputStream();
         ostr.write(content.getBytes());
         ostr.close();
-        doc.close();
         return doc;
     }
 
