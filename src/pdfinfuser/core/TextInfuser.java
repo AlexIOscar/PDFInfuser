@@ -1,64 +1,87 @@
 package pdfinfuser.core;
 
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.pdfwriter.COSWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 import org.apache.pdfbox.util.Matrix;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TextInfuser {
 
     public static PDDocument injectText(PDDocument doc, String text) throws IOException {
+
         //zero index corresponds to the first page
+
+        // чекаем метаданные нулевой страницы, если документ уже ранее "прошивался", необходимо заменить в нем ранее
+        // внесенные ватермарки новыми, о чем сообщаем через флаг
+        boolean alreadyMarked = false;
+        PDPage page = doc.getPage(0);
+        PDMetadata meta = page.getMetadata();
+        if (meta != null) {
+            String metaString = new String(meta.exportXMPMetadata().readAllBytes());
+            if (metaString.equals("PDFInfuserMetadata")) {
+                alreadyMarked = true;
+                System.out.println("Already watermarked!");
+            }
+        }
+
         int count = doc.getNumberOfPages();
         for (int i = 0; i < count; i++) {
-            addWatermarks(doc, i, text);
+            if (alreadyMarked) {
+                replaceWM(doc, i, text);
+            } else {
+                addWatermarks(doc, i, text);
+            }
         }
-
-        PDPage page = doc.getPage(0);
-        Iterator<PDStream> iter = page.getContentStreams();
-        InputStream inpStr = page.getContents();
-        System.out.println(new String(inpStr.readAllBytes()));
-        PDStream stream = null;
-        while (iter.hasNext()){
-            stream = iter.next();
-        }
-
-        assert stream != null;
-        InputStream istr = stream.createInputStream();
-        byte[] bytes = istr.readAllBytes();
-        String content = new String(bytes);
-        //System.out.println(content);
-        OutputStream ostr = stream.createOutputStream();
-        ostr.write(content.getBytes());
-        ostr.close();
         return doc;
+    }
+
+    private static void replaceWM(PDDocument doc, int pageIndex, String replacingText) throws IOException {
+        PDPage page = doc.getPage(pageIndex);
+        Iterator<PDStream> contStrs = page.getContentStreams();
+        while (contStrs.hasNext()) {
+            PDStream contStream = contStrs.next();
+            InputStream istr = contStream.createInputStream();
+            String content = new String(istr.readAllBytes());
+            Pattern pattern = Pattern.compile("^%This is PDFInfuser technical note. Please don't remove it for the " +
+                    "God's sake\\n");
+            Matcher matcher = pattern.matcher(content);
+
+            if (matcher.find()) {
+                System.out.println(content);
+                PDType0Font ttfont = PDType0Font.load(doc, new FileInputStream("AG Helvetica.ttf"), false);
+
+                String[] splitted = content.split("<[0123456789ABCDEF]+>");
+                int parts = splitted.length;
+
+                OutputStream ostr = contStream.createOutputStream();
+                String outStr;
+                for (int i = 0; i < parts; i++) {
+                    ostr.write(splitted[i].getBytes());
+                    if (i < parts - 1) {
+                        COSWriter.writeString(ttfont.encode(replacingText), ostr);
+                    }
+                }
+                ostr.close();
+            }
+        }
     }
 
     private static void addWatermarks(PDDocument doc, int pageIndex, String textToBake) throws IOException {
         PDPage page = doc.getPage(pageIndex);
 
-        //checking the metadata
-        PDMetadata meta = page.getMetadata();
-        if (meta != null) {
-            String metaString = new String(meta.exportXMPMetadata().readAllBytes());
-            if (metaString.equals("PDFInfuserMetadata")) {
-                System.out.println("Already watermarked!");
-            }
-        }
-
+        //set metadata to page
         COSStream cos = new COSStream();
         OutputStream outstr = cos.createOutputStream();
         outstr.write("PDFInfuserMetadata".getBytes());
@@ -66,14 +89,15 @@ public class TextInfuser {
         page.setMetadata(new PDMetadata(cos));
 
         PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false);
-        contentStream.addComment("This is programming added comment");
+        contentStream.addComment("This is PDFInfuser technical note. Please don't remove it for the God's sake");
         //common tunes
         contentStream.setRenderingMode(RenderingMode.FILL_STROKE);
-        PDFont font = PDType1Font.HELVETICA_OBLIQUE;
+        PDType0Font ttfont = PDType0Font.load(doc, new FileInputStream("AG Helvetica.ttf"), false);
+
         contentStream.setLineWidth(0.12f);
         contentStream.setNonStrokingColor(Color.BLUE.darker());
         contentStream.setStrokingColor(Color.WHITE);
-        contentStream.setFont(font, 12);
+        contentStream.setFont(ttfont, 12);
 
         contentStream.beginText();
 
