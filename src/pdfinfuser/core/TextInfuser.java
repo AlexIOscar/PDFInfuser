@@ -1,6 +1,7 @@
 package pdfinfuser.core;
 
 import org.apache.pdfbox.cos.COSStream;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdfwriter.COSWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -20,7 +21,6 @@ import java.util.regex.Pattern;
 public class TextInfuser {
 
     public static PDDocument injectText(PDDocument doc, String text) throws IOException {
-
         //zero index corresponds to the first page
 
         // чекаем метаданные нулевой страницы, если документ уже ранее "прошивался", необходимо заменить в нем ранее
@@ -29,7 +29,7 @@ public class TextInfuser {
         PDPage page = doc.getPage(0);
         PDMetadata meta = page.getMetadata();
         if (meta != null) {
-            String metaString = new String(meta.exportXMPMetadata().readAllBytes());
+            String metaString = new String(IOUtils.toByteArray(meta.exportXMPMetadata()));
             if (metaString.equals("PDFInfuserMetadata")) {
                 alreadyMarked = true;
                 System.out.println("Already watermarked!");
@@ -53,7 +53,7 @@ public class TextInfuser {
         while (contStrs.hasNext()) {
             PDStream contStream = contStrs.next();
             InputStream istr = contStream.createInputStream();
-            String content = new String(istr.readAllBytes());
+            String content = new String(IOUtils.toByteArray(istr));
             Pattern pattern = Pattern.compile("^%This is PDFInfuser technical note. Please don't remove it for the " +
                     "God's sake\\n");
             Matcher matcher = pattern.matcher(content);
@@ -66,7 +66,6 @@ public class TextInfuser {
                 int parts = splitted.length;
 
                 OutputStream ostr = contStream.createOutputStream();
-                String outStr;
                 for (int i = 0; i < parts; i++) {
                     ostr.write(splitted[i].getBytes());
                     if (i < parts - 1) {

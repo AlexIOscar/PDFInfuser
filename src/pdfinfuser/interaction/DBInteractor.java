@@ -1,6 +1,5 @@
 package pdfinfuser.interaction;
-
-import org.firebirdsql.jdbc.FBBlob;
+import org.apache.pdfbox.io.IOUtils;
 import pdfinfuseraux.WindowsRegistry;
 
 import java.io.*;
@@ -23,33 +22,32 @@ public class DBInteractor {
         String regAddres = "HKCU\\Software\\OEMZ\\Production Manager\\Setting\\dsn";
 
         String serverName = WindowsRegistry.readRegistry(regAddres, "DataSourse_2005");
-        //String dbName = WindowsRegistry.readRegistry(regAddres, "DATABASE_FireBird");
-        String dbName = "ProdMgrFileArchive";
+        String dbName = WindowsRegistry.readRegistry(regAddres, "DATABASE_FireBird");
         String port = "3050";
 
         return String.format("jdbc:firebirdsql://%s:%s/%s", serverName, port, dbName);
     }
 
-    public void setBlob(int listID, File archFile) throws SQLException, IOException {
+    public void setBlob(int fileID, File archFile) throws SQLException, IOException {
         FileInputStream fis = new FileInputStream(archFile);
 
-        String query = "UPDATE SPRNUMLISTOV SET PDF_FILE = ? WHERE IDNUMLISTA = ?;";
+        String query = "UPDATE Files_Of_Sheets_On_II SET PDF_FILE = ? WHERE ID_FILE = ?";
         PreparedStatement pstm = con.prepareStatement(query);
         pstm.setBlob(1, fis);
-        pstm.setInt(2, listID);
+        pstm.setInt(2, fileID);
 
-        System.out.println("rows affected: " + pstm.executeUpdate());
+        //System.out.println("rows affected: " + pstm.executeUpdate());
         fis.close();
     }
 
     public void getBlob(int listID) throws SQLException, IOException {
-        String query = "SELECT PDF_FILE FROM SPRNUMLISTOV WHERE IDNUMLISTA = ?";
+        String query = "SELECT PDF_FILE FROM SPRNUMLISTOV WHERE IDNUMLISTA = ?;";
         PreparedStatement pstm = con.prepareStatement(query);
         pstm.setInt(1, listID);
         ResultSet rs = pstm.executeQuery();
 
         while (rs.next()){
-            byte[] content = rs.getBinaryStream(1).readAllBytes();
+            byte[] content = IOUtils.toByteArray(rs.getBinaryStream(1));
             File outFile = new File("TestOutputArch");
             FileOutputStream fos = new FileOutputStream(outFile);
             fos.write(content);
