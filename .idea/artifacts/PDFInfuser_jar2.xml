@@ -1,0 +1,22 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PDFInfuser:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/PDFInfuser_jar2</output-path>
+    <root id="archive" name="PDFInfuser.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src2/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="PDFInfuser" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/LogBack/slf4j-api-1.7.36.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/LogBack/logback-core-1.2.10.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/LogBack/logback-classic-1.2.10.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/fontbox-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/pdfbox-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/pdfbox-tools-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/preflight-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/xmpbox-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/CommandLineApps/pdfbox-app-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/PDFBox/CommandLineApps/preflight-app-2.0.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../USERDIR/Distr/jaybird-4.0.3.java8/jaybird-full-4.0.3.java8.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

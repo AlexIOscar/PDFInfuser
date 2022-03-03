@@ -16,6 +16,7 @@ public class DBInteractor {
         String pass = WindowsRegistry.readRegistry(regAddres, "PWD_2005");
 
         con = DriverManager.getConnection(conString, userName, pass);
+        con.setAutoCommit(false);
     }
 
     private String getConnString() {
@@ -36,8 +37,9 @@ public class DBInteractor {
         pstm.setBlob(1, fis);
         pstm.setInt(2, fileID);
 
-        //System.out.println("rows affected: " + pstm.executeUpdate());
+        System.out.println("rows affected: " + pstm.executeUpdate());
         fis.close();
+        con.commit();
     }
 
     public void getBlob(int listID) throws SQLException, IOException {

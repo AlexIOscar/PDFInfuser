@@ -18,11 +18,12 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static testpkg.Starter.logger;
+
 public class TextInfuser {
 
     public static PDDocument injectText(PDDocument doc, String text) throws IOException {
         //zero index corresponds to the first page
-
         // чекаем метаданные нулевой страницы, если документ уже ранее "прошивался", необходимо заменить в нем ранее
         // внесенные ватермарки новыми, о чем сообщаем через флаг
         boolean alreadyMarked = false;
@@ -32,15 +33,17 @@ public class TextInfuser {
             String metaString = new String(IOUtils.toByteArray(meta.exportXMPMetadata()));
             if (metaString.equals("PDFInfuserMetadata")) {
                 alreadyMarked = true;
-                System.out.println("Already watermarked!");
+                logger.info("The document already watermarked, mark will be replaced");
             }
         }
 
         int count = doc.getNumberOfPages();
         for (int i = 0; i < count; i++) {
             if (alreadyMarked) {
+                logger.trace("Replacing watermark on page {}", i);
                 replaceWM(doc, i, text);
             } else {
+                logger.trace("Adding watermark on page {}", i);
                 addWatermarks(doc, i, text);
             }
         }
@@ -59,8 +62,14 @@ public class TextInfuser {
             Matcher matcher = pattern.matcher(content);
 
             if (matcher.find()) {
-                System.out.println(content);
-                PDType0Font ttfont = PDType0Font.load(doc, new FileInputStream("AG Helvetica.ttf"), false);
+                //System.out.println(content);
+                InputStream helvFis = new FileInputStream(new File("C:\\OEMZ\\Production manager\\Java\\AGHelvetica" +
+                        ".ttf"));
+                PDType0Font ttfont = PDType0Font.load(doc, helvFis, false);
+                if (ttfont != null) {
+                    logger.info("Font created");
+                }
+                helvFis.close();
 
                 String[] splitted = content.split("<[0123456789ABCDEF]+>");
                 int parts = splitted.length;
@@ -91,7 +100,10 @@ public class TextInfuser {
         contentStream.addComment("This is PDFInfuser technical note. Please don't remove it for the God's sake");
         //common tunes
         contentStream.setRenderingMode(RenderingMode.FILL_STROKE);
-        PDType0Font ttfont = PDType0Font.load(doc, new FileInputStream("AG Helvetica.ttf"), false);
+
+        FileInputStream helvFis = new FileInputStream(new File("C:\\OEMZ\\Production manager\\Java\\AGHelvetica.ttf"));
+        PDType0Font ttfont = PDType0Font.load(doc, helvFis, false);
+        helvFis.close();
 
         contentStream.setLineWidth(0.12f);
         contentStream.setNonStrokingColor(Color.BLUE.darker());
