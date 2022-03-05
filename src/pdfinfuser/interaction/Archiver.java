@@ -3,7 +3,6 @@ package pdfinfuser.interaction;
 import pdfinfuseraux.WindowsRegistry;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Archiver {
     public static void archiveFile(String input, String output) throws IOException {

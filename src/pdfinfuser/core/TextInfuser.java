@@ -11,11 +11,9 @@ import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 import org.apache.pdfbox.util.Matrix;
-import testpkg.Starter;
 
 import java.awt.*;
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +33,12 @@ public class TextInfuser {
         helvFis.close();
     }
 
+    /**
+     * The method places input text into each corner of each page of document doc, along of page edge
+     * @param text text inject to
+     * @return PDDocument with changes
+     * @throws IOException I/O Exception
+     */
     public PDDocument injectText(String text) throws IOException {
         //zero index corresponds to the first page
         // чекаем метаданные нулевой страницы, если документ уже ранее "прошивался", необходимо заменить в нем ранее
@@ -63,6 +67,13 @@ public class TextInfuser {
         return doc;
     }
 
+    /**
+     * Do injectText-business with the page if the page watermarked already
+     * @param doc processing document
+     * @param pageIndex page inject to
+     * @param replacingText text watermarked to (via replacing)
+     * @throws IOException I/O Exception
+     */
     private void replaceWM(PDDocument doc, int pageIndex, String replacingText) throws IOException {
         PDPage page = doc.getPage(pageIndex);
         Iterator<PDStream> contStrs = page.getContentStreams();
@@ -91,6 +102,13 @@ public class TextInfuser {
         }
     }
 
+    /**
+     * Do injectText-business with the page if the page have not watermarked yet
+     * @param doc processing document
+     * @param pageIndex page inject to
+     * @param textToBake text watermarked to
+     * @throws IOException I/O Exception
+     */
     private void addWatermarks(PDDocument doc, int pageIndex, String textToBake) throws IOException {
         PDPage page = doc.getPage(pageIndex);
 

@@ -25,6 +25,15 @@ public class Starter {
         logger = LoggerFactory.getLogger("pdfinfuser.Starter");
     }
 
+    /**
+     * entry point
+     * @param args the defined call signature is:
+     *             arg[0] have to contain absolute path to text file with structure (starts with 1):
+     *             1*n line: "ID_FILE = XXX", where XXX is ID in DB
+     *             2*n line: "FILE_PATH = XXX", where XXX is absolute path to .pdf file
+     *             3*n line: "INPUTED_TEXT = XXX", where XXX is text to placed in input .pdf file
+     *             The ListOFFiles.txt have to contain 3*n lines, or error "Wrong input file structure" will be logged
+     */
     public static void main(String[] args) {
         File origin;
         logger.info("Exec arg 0: {}", args[0]);
@@ -90,6 +99,9 @@ public class Starter {
         System.out.println("origin file deleted:" + origin.delete());
     }
 
+    /**
+     * The method defined location of the log-file and the logger configuration .xml
+     */
     public static void rewriteLogOutput() {
         File logConfigFile = new File("C:\\OEMZ\\Production manager\\Java\\logback.xml");
         if (logConfigFile.exists()) {
