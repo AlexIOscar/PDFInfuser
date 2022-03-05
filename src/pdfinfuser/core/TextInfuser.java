@@ -11,9 +11,11 @@ import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 import org.apache.pdfbox.util.Matrix;
+import testpkg.Starter;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +24,18 @@ import static testpkg.Starter.logger;
 
 public class TextInfuser {
 
-    public static PDDocument injectText(PDDocument doc, String text) throws IOException {
+    PDDocument doc;
+
+    private final PDType0Font font;
+
+    public TextInfuser(PDDocument doc) throws IOException {
+        this.doc = doc;
+        FileInputStream helvFis = new FileInputStream(new File("C:\\OEMZ\\Production manager\\Java\\AGHelvetica.ttf"));
+        this.font = PDType0Font.load(this.doc, helvFis, false);
+        helvFis.close();
+    }
+
+    public PDDocument injectText(String text) throws IOException {
         //zero index corresponds to the first page
         // чекаем метаданные нулевой страницы, если документ уже ранее "прошивался", необходимо заменить в нем ранее
         // внесенные ватермарки новыми, о чем сообщаем через флаг
@@ -50,7 +63,7 @@ public class TextInfuser {
         return doc;
     }
 
-    private static void replaceWM(PDDocument doc, int pageIndex, String replacingText) throws IOException {
+    private void replaceWM(PDDocument doc, int pageIndex, String replacingText) throws IOException {
         PDPage page = doc.getPage(pageIndex);
         Iterator<PDStream> contStrs = page.getContentStreams();
         while (contStrs.hasNext()) {
@@ -63,14 +76,6 @@ public class TextInfuser {
 
             if (matcher.find()) {
                 //System.out.println(content);
-                InputStream helvFis = new FileInputStream(new File("C:\\OEMZ\\Production manager\\Java\\AGHelvetica" +
-                        ".ttf"));
-                PDType0Font ttfont = PDType0Font.load(doc, helvFis, false);
-                if (ttfont != null) {
-                    logger.info("Font created");
-                }
-                helvFis.close();
-
                 String[] splitted = content.split("<[0123456789ABCDEF]+>");
                 int parts = splitted.length;
 
@@ -78,7 +83,7 @@ public class TextInfuser {
                 for (int i = 0; i < parts; i++) {
                     ostr.write(splitted[i].getBytes());
                     if (i < parts - 1) {
-                        COSWriter.writeString(ttfont.encode(replacingText), ostr);
+                        COSWriter.writeString(font.encode(replacingText), ostr);
                     }
                 }
                 ostr.close();
@@ -86,7 +91,7 @@ public class TextInfuser {
         }
     }
 
-    private static void addWatermarks(PDDocument doc, int pageIndex, String textToBake) throws IOException {
+    private void addWatermarks(PDDocument doc, int pageIndex, String textToBake) throws IOException {
         PDPage page = doc.getPage(pageIndex);
 
         //set metadata to page
@@ -96,19 +101,16 @@ public class TextInfuser {
         outstr.close();
         page.setMetadata(new PDMetadata(cos));
 
-        PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, false);
+        PDPageContentStream contentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND,
+                false, true);
         contentStream.addComment("This is PDFInfuser technical note. Please don't remove it for the God's sake");
         //common tunes
         contentStream.setRenderingMode(RenderingMode.FILL_STROKE);
 
-        FileInputStream helvFis = new FileInputStream(new File("C:\\OEMZ\\Production manager\\Java\\AGHelvetica.ttf"));
-        PDType0Font ttfont = PDType0Font.load(doc, helvFis, false);
-        helvFis.close();
-
         contentStream.setLineWidth(0.12f);
         contentStream.setNonStrokingColor(Color.BLUE.darker());
         contentStream.setStrokingColor(Color.WHITE);
-        contentStream.setFont(ttfont, 12);
+        contentStream.setFont(font, 12);
 
         contentStream.beginText();
 

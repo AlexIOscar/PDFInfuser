@@ -13,12 +13,15 @@ import pdfinfuseraux.TextProcessor;
 import java.io.*;
 import java.sql.SQLException;
 
+import ch.qos.logback.classic.util.ContextInitializer;
+
 public class Starter {
 
     public static final Logger logger;
 
     static {
         rewriteLogOutput();
+        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "C:\\OEMZ\\Production manager\\Java\\logback.xml");
         logger = LoggerFactory.getLogger("pdfinfuser.Starter");
     }
 
@@ -57,7 +60,9 @@ public class Starter {
                 //replacing chars due to helvetica does not contain some glyphs
                 wmText = TextProcessor.replaceChars(wmText);
 
-                TextInfuser.injectText(doc, wmText);
+                TextInfuser textInf = new TextInfuser(doc);
+
+                textInf.injectText(wmText);
                 File outPDF = new File(filePath);
                 File out7z = new File(filePath.replaceAll("\\.pdf", ".7z"));
                 doc.save(outPDF);
